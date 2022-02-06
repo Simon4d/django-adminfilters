@@ -3,6 +3,7 @@ BUILDDIR=${PWD}/~build
 BINDIR=${PWD}/~build/bin
 export PYTHONPATH:=${PWD}/tests/:${PWD}/src
 DJANGO?='1.7.x'
+COVERAGE_EXTRA_OPS?=
 
 .mkbuilddir:
 	mkdir -p ${BUILDDIR}
@@ -32,7 +33,7 @@ fullclean:
 	$(MAKE) clean
 
 coverage:
-	 py.test src tests -vv --capture=no --doctest-modules --cov=adminfilters --cov-report=html --cov-config=tests/.coveragerc
+	 py.test src tests -vv --capture=no --doctest-modules --cov=adminfilters --cov-report=html --cov-config=tests/.coveragerc ${COVERAGE_EXTRA_OPS}
 
 docs: mkbuilddir
 	mkdir -p ${BUILDDIR}/docs
