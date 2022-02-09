@@ -11,7 +11,7 @@ from adminfilters.filters import (DjangoLookupFilter, GenericLookupFieldFilter,
                                   NumberFilter, QueryStringFilter,
                                   RelatedFieldCheckBoxFilter,
                                   RelatedFieldRadioFilter, UnionFieldListFilter,
-                                  ValueFilter,)
+                                  ValueFilter, MultiValueFilter)
 from adminfilters.mixin import AdminFiltersMixin
 
 from .models import Artist, Band, Country
@@ -69,9 +69,12 @@ class DemoModelFieldAdmin(DebugMixin, ModelAdmin):
     )
 
 
-class CountryModelAdmin(DebugMixin, ModelAdmin):
+class CountryModelAdmin(DebugMixin, AdminFiltersMixin, ModelAdmin):
     list_display = [f.name for f in Country._meta.fields]
     search_fields = ('name',)
+    list_filter = (
+        ('name', MultiValueFilter),
+    )
 
 
 class BandModelAdmin(DebugMixin, ModelAdmin):
