@@ -8,7 +8,7 @@ def test_valuefilter(live_server, selenium):
     from demo.models import Artist
     artist_name = Artist.objects.all()[:1][0].name
     count = Artist.objects.filter(name=artist_name).count()
-    assert Artist.objects.all().count() > count, "Too many Artists for ValueFilter test"  # Sanity check
+    assert Artist.objects.all().count() > count, "Too few Artists for ValueFilter test"  # Sanity check
 
     selenium.get(live_server.url)
     dim = selenium.get_window_size()
@@ -30,7 +30,7 @@ def test_multivaluefilter(live_server, selenium):
     from demo.models import Country
     country_names = [country.name for country in Country.objects.all()[:2]]
     count = Country.objects.filter(name__in=country_names).count()
-    assert Country.objects.all().count() > count, "Too many Countries for MultiValueFilter test"  # Sanity check
+    assert Country.objects.all().count() > count, "Too few Countries for MultiValueFilter test"  # Sanity check
 
     selenium.get(live_server.url)
     dim = selenium.get_window_size()
@@ -52,7 +52,7 @@ def test_multivaluefilter_exclude(live_server, selenium):
     from demo.models import Country
     country_names = [country.name for country in Country.objects.all()[:2]]
     count = Country.objects.filter(name__in=country_names).count()
-    assert Country.objects.all().count() > count, "Too many Countries for MultiValueFilter test"  # Sanity check
+    assert Country.objects.all().count() > count, "Too few Countries for MultiValueFilter test"  # Sanity check
 
     selenium.get(live_server.url)
     dim = selenium.get_window_size()
