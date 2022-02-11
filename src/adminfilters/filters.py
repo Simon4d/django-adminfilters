@@ -1,5 +1,5 @@
 from .autocomplete import AutoCompleteFilter
-from .checkbox import RelatedFieldCheckBoxFilter
+from .checkbox import RelatedFieldCheckBoxFilter, ChoicesCheckboxFilter
 from .combo import (AllValuesComboFilter, ChoicesFieldComboFilter,
                     RelatedFieldComboFilter,)
 from .dj import DjangoLookupFilter

@@ -9,8 +9,7 @@ from adminfilters.filters import (BooleanRadioFilter, DjangoLookupFilter,
                                   IntersectionFieldListFilter, NumberFilter,
                                   QueryStringFilter, RelatedFieldCheckBoxFilter,
                                   RelatedFieldRadioFilter, UnionFieldListFilter,
-                                  ValueFilter,)
-from adminfilters.json import JsonFieldFilter
+                                  ValueFilter, ChoicesCheckboxFilter)
 from adminfilters.mixin import AdminFiltersMixin
 from adminfilters.value import MultiValueFilter
 
@@ -78,8 +77,9 @@ class CountryModelAdmin(DebugMixin, ModelAdmin):
 class BandModelAdmin(DebugMixin, ModelAdmin):
     list_display = [f.name for f in Band._meta.fields]
     search_fields = ('name',)
-    list_filter = ('genre',
-                   )
+    list_filter = (
+        ('genre', ChoicesCheckboxFilter),
+    )
 
 
 class ArtistModelAdmin(DebugMixin, AdminFiltersMixin, ModelAdmin):

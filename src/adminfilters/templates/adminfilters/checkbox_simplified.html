@@ -1,0 +1,30 @@
+{% load i18n %}
+<h3>{% blocktrans with title as filter_title %} By {{ filter_title }}{% endblocktrans %}</h3>
+<div id="field-{{ spec.field.name }}">
+    <ul>
+    {% for choice in choices %}
+        <li>
+            <label>
+                <input type="checkbox"{% if choice.selected %} checked="checked"{% endif %}
+                value="{{ choice.query_string }}"/> {{ choice.display }}
+            </label>
+        </li>
+    {% endfor %}
+    </ul>
+</div>
+<script type="text/javascript">
+    (function($){
+        $('#field-{{ spec.field.name }} input[type=checkbox]').change(function(){
+            var rex = /(.*)\?(.*)/gi;
+            var m = rex.exec(location.href);
+
+            if(m) {
+                var base = m[1];
+            }else {
+                var base = location.href;
+            }
+
+            location.href = base + $(this).val();
+        });
+    })(django.jQuery);
+</script>

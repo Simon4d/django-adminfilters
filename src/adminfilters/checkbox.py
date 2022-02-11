@@ -1,10 +1,11 @@
 from django.contrib.admin.filters import RelatedFieldListFilter
 from django.db.models.fields.related import ForeignObjectRel
+from django.db.models.fields import AutoField, IntegerField
 from django.db.models.query_utils import Q
 from django.utils.encoding import smart_str
 from django.utils.translation import gettext as _
 
-from .mixin import MediaDefinitionFilter, WrappperMixin
+from .mixin import MediaDefinitionFilter, WrappperMixin, SmartFieldListFilter
 from .utils import parse_bool
 
 
@@ -73,4 +74,57 @@ class RelatedFieldCheckBoxFilter(WrappperMixin, MediaDefinitionFilter, RelatedFi
                     [self.lookup_kwarg]),
                 'uncheck_to_remove': '{}=1'.format(self.lookup_kwarg_isnull),
                 'display': EMPTY_CHANGELIST_VALUE,
+            }
+
+
+class ChoicesCheckboxFilter(SmartFieldListFilter):
+    template = 'adminfilters/checkbox_simplified.html'
+
+    def __init__(self, field, request, params, model, model_admin, field_path):
+        self.lookup_kwarg = '%s__in' % field_path
+        super().__init__(field, request, params, model, model_admin, field_path)
+        self.lookup_val = request.GET.getlist(self.lookup_kwarg, [])
+        self.lookup_choices = field.get_choices(include_blank=False)
+
+    def expected_parameters(self):
+        return [self.lookup_kwarg]
+
+    def queryset(self, request, queryset):
+        return super().queryset(request, queryset)
+
+    def choices(self, cl):
+        """
+        https://docs.djangoproject.com/en/dev/ref/contrib/admin/filters/
+        TODO: test integration with other fields
+        """
+        values = self.used_parameters.get(self.lookup_kwarg, [])
+
+        yield {
+            'selected': not values,
+            'query_string': cl.get_query_string({}, [self.lookup_kwarg]),  # No parameter {} and remove lookup_kwarg from URL
+            'display': _('All'),
+        }
+
+        # TODO: implement None management
+
+        for pk_val, val in self.lookup_choices:
+            selected = smart_str(pk_val) in values
+
+            if selected:
+                query_string = list(dict.fromkeys(values))
+                query_string.remove(smart_str(pk_val))
+            else:
+                query_string = list(dict.fromkeys(values + [smart_str(pk_val)]))
+
+            if not query_string:
+                remove = []
+                new_params = {self.lookup_kwarg: ','.join(query_string)}
+            else:
+                remove = [self.lookup_kwarg]
+                new_params = {}
+
+            yield {
+                'selected': selected,
+                'query_string': cl.get_query_string(new_params, remove),
+                'display': val,
             }
