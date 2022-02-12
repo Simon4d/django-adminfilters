@@ -116,7 +116,7 @@ class ChoicesCheckboxFilter(SmartFieldListFilter):
             else:
                 query_string = list(dict.fromkeys(values + [smart_str(pk_val)]))
 
-            if not query_string:
+            if query_string:
                 remove = []
                 new_params = {self.lookup_kwarg: ','.join(query_string)}
             else:

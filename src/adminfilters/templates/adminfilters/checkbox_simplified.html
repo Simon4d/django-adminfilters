@@ -15,16 +15,16 @@
 <script type="text/javascript">
     (function($){
         $('#field-{{ spec.field.name }} input[type=checkbox]').change(function(){
-            var rex = /(.*)\?(.*)/gi;
-            var m = rex.exec(location.href);
-
-            if(m) {
-                var base = m[1];
-            }else {
-                var base = location.href;
+            let url = new URL(location.href);  // Not compatible with IE: https://developer.mozilla.org/en-US/docs/Web/API/URL/URL
+            let filter = $(this).val().replace("?", "").split('&');
+            // FIXME: not working with empty filter (All)
+            for (const param of filter) {
+                let param_split = param.split('=');
+                if (param_split.length == 2) {
+                    url.searchParams.set(param_split[0], decodeURIComponent(param_split[1]));
+                }
             }
-
-            location.href = base + $(this).val();
+            location.href = url.href;
         });
     })(django.jQuery);
 </script>
