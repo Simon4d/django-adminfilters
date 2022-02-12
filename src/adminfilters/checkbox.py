@@ -103,6 +103,7 @@ class ChoicesCheckboxFilter(SmartFieldListFilter):
             'selected': not values,
             'query_string': cl.get_query_string({}, [self.lookup_kwarg]),  # No parameter {} and remove lookup_kwarg from URL
             'display': _('All'),
+            'check_to_remove': self.lookup_kwarg
         }
 
         # TODO: implement None management
@@ -127,4 +128,5 @@ class ChoicesCheckboxFilter(SmartFieldListFilter):
                 'selected': selected,
                 'query_string': cl.get_query_string(new_params, remove),
                 'display': val,
+                'check_to_remove': self.lookup_kwarg if remove else ''
             }

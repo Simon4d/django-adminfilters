@@ -6,7 +6,8 @@
         <li>
             <label>
                 <input type="checkbox"{% if choice.selected %} checked="checked"{% endif %}
-                value="{{ choice.query_string }}"/> {{ choice.display }}
+                       data-check-to-remove="{{ choice.check_to_remove }}"
+                       value="{{ choice.query_string }}"/> {{ choice.display }}
             </label>
         </li>
     {% endfor %}
@@ -16,12 +17,19 @@
     (function($){
         $('#field-{{ spec.field.name }} input[type=checkbox]').change(function(){
             let url = new URL(location.href);  // Not compatible with IE: https://developer.mozilla.org/en-US/docs/Web/API/URL/URL
-            let filter = $(this).val().replace("?", "").split('&');
-            // FIXME: not working with empty filter (All)
-            for (const param of filter) {
-                let param_split = param.split('=');
-                if (param_split.length == 2) {
-                    url.searchParams.set(param_split[0], decodeURIComponent(param_split[1]));
+            let check_to_remove = $(this).data('check-to-remove');
+            let filter = $(this).val().replace("?", "").split('&').filter(n => n);
+
+            console.log(filter, check_to_remove);
+            if (filter.length == 0 ) {
+                // FIXME: doesn't work if mixed with other filters
+                url.searchParams.delete(check_to_remove);
+            } else {
+                for (const param of filter) {
+                    let param_split = param.split('=');
+                    if (param_split.length == 2) {
+                        url.searchParams.set(param_split[0], decodeURIComponent(param_split[1]));
+                    }
                 }
             }
             location.href = url.href;

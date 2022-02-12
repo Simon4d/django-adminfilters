@@ -74,11 +74,12 @@ class CountryModelAdmin(DebugMixin, ModelAdmin):
     search_fields = ('name',)
 
 
-class BandModelAdmin(DebugMixin, ModelAdmin):
+class BandModelAdmin(DebugMixin, AdminFiltersMixin, ModelAdmin):
     list_display = [f.name for f in Band._meta.fields]
     search_fields = ('name',)
     list_filter = (
         ('genre', ChoicesCheckboxFilter),
+        ('name', MultiValueFilter),
     )
 
 
