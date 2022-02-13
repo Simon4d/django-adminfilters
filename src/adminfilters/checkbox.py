@@ -78,7 +78,7 @@ class RelatedFieldCheckBoxFilter(WrappperMixin, MediaDefinitionFilter, RelatedFi
 
 
 class ChoicesCheckboxFilter(SmartFieldListFilter):
-    template = 'adminfilters/checkbox_simplified.html'
+    template = 'adminfilters/icheckbox.html'
 
     def __init__(self, field, request, params, model, model_admin, field_path):
         self.lookup_kwarg = '%s__in' % field_path
@@ -89,14 +89,7 @@ class ChoicesCheckboxFilter(SmartFieldListFilter):
     def expected_parameters(self):
         return [self.lookup_kwarg]
 
-    def queryset(self, request, queryset):
-        return super().queryset(request, queryset)
-
     def choices(self, cl):
-        """
-        https://docs.djangoproject.com/en/dev/ref/contrib/admin/filters/
-        TODO: test integration with other fields
-        """
         values = self.used_parameters.get(self.lookup_kwarg, [])
 
         yield {
