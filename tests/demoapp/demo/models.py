@@ -59,7 +59,8 @@ class Band(models.Model):
                                          (2, 'Blues'),
                                          (3, 'Soul'),
                                          (4, 'Other'),
-                                         ))
+                                         ),
+                                null=True, blank=True)
     active = models.BooleanField(default=True)
 
     def __str__(self):

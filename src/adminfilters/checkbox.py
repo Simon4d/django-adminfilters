@@ -82,33 +82,57 @@ class ChoicesCheckboxFilter(SmartFieldListFilter):
 
     def __init__(self, field, request, params, model, model_admin, field_path):
         self.lookup_kwarg = '%s__in' % field_path
+        self.lookup_kwarg_isnull = '%s__isnull' % field_path
         super().__init__(field, request, params, model, model_admin, field_path)
         self.lookup_val = request.GET.getlist(self.lookup_kwarg, [])
+        self.lookup_val_isnull = params.get(self.lookup_kwarg_isnull)
         self.lookup_choices = field.get_choices(include_blank=False)
 
     def expected_parameters(self):
-        return [self.lookup_kwarg]
+        return [self.lookup_kwarg, self.lookup_kwarg_isnull]
+
+    def get_updated_values(self):
+        """self.lookup_kwarg and self.lookup_kwarg_isnull are not directly updated when changed by Javascript"""
+        return (self.used_parameters.get(self.lookup_kwarg, []),
+                self.used_parameters.get(self.lookup_kwarg_isnull, None))
+
+    def queryset(self, request, queryset):
+        lookup_val, lookup_val_isnull = self.get_updated_values()
+        filters = Q()
+
+        if lookup_val:
+            filters.add(Q(**{self.lookup_kwarg: lookup_val}), Q.OR)
+
+        if lookup_val_isnull:
+            filters.add(Q(**{self.lookup_kwarg_isnull: parse_bool(lookup_val_isnull)}), Q.OR)
+
+        return queryset.filter(filters)
 
     def choices(self, cl):
-        values = self.used_parameters.get(self.lookup_kwarg, [])
+        lookup_val, lookup_val_isnull = self.get_updated_values()
 
         yield {
-            'selected': not values,
-            'query_string': cl.get_query_string({}, [self.lookup_kwarg]),  # No parameter {} and remove lookup_kwarg from URL
+            'selected': not len(lookup_val) and not lookup_val_isnull,
+            'query_string': cl.get_query_string({}, [self.lookup_kwarg, self.lookup_kwarg_isnull]),
             'display': _('All'),
-            'check_to_remove': self.lookup_kwarg
+            'to_remove': '&'.join([self.lookup_kwarg, self.lookup_kwarg_isnull])
         }
 
-        # TODO: implement None management
+        yield {
+            'selected': lookup_val_isnull,
+            'query_string': cl.get_query_string({self.lookup_kwarg_isnull: 1} if not lookup_val_isnull else {}, [self.lookup_kwarg, self.lookup_kwarg_isnull]),
+            'display': _('None'),
+            'to_remove': self.lookup_kwarg if not lookup_val_isnull else self.lookup_kwarg_isnull
+        }
 
         for pk_val, val in self.lookup_choices:
-            selected = smart_str(pk_val) in values
+            selected = smart_str(pk_val) in lookup_val
 
             if selected:
-                query_string = list(dict.fromkeys(values))
+                query_string = list(dict.fromkeys(lookup_val))
                 query_string.remove(smart_str(pk_val))
             else:
-                query_string = list(dict.fromkeys(values + [smart_str(pk_val)]))
+                query_string = list(dict.fromkeys(lookup_val + [smart_str(pk_val)]))
 
             if query_string:
                 remove = []
@@ -119,7 +143,7 @@ class ChoicesCheckboxFilter(SmartFieldListFilter):
 
             yield {
                 'selected': selected,
-                'query_string': cl.get_query_string(new_params, remove),
+                'query_string': cl.get_query_string(new_params, remove + [self.lookup_kwarg_isnull]),
                 'display': val,
-                'check_to_remove': self.lookup_kwarg if remove else ''
+                'to_remove': '&'.join([self.lookup_kwarg, self.lookup_kwarg_isnull]) if remove else self.lookup_kwarg_isnull
             }

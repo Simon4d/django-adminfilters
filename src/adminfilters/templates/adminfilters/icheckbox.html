@@ -6,7 +6,7 @@
         <li>
             <label>
                 <input type="checkbox"{% if choice.selected %} checked="checked"{% endif %}
-                       data-check-to-remove="{{ choice.check_to_remove }}"
+                       data-to-remove="{{ choice.to_remove }}"
                        value="{{ choice.query_string }}"/> {{ choice.display }}
             </label>
         </li>
@@ -18,7 +18,7 @@
         $('#field-{{ spec.field.name }} input[type=checkbox]').change(function(){
             let url_params_regex = /(.*)\?(.*)/gi;
             let url_params_match = url_params_regex.exec(location.href);
-            let check_to_remove = $(this).data('check-to-remove');
+            let check_to_remove = $(this).data('to-remove').split('&').filter(n => n);
             let filter = $(this).val().replace("?", "").split('&').filter(n => n);
 
             // Split URL and GET parameters
@@ -36,17 +36,17 @@
                 params_dict.set(param_split[0], param_split[1]);
             }
 
-            if (check_to_remove.length != 0 ) {
-                // Remove GET parameter
-                params_dict.delete(check_to_remove);
-            } else {
-                for (const param of filter) {
-                    // Update GET parameter
-                    let param_split = param.split('=');
-                    params_dict.set(param_split[0], param_split[1]);
-                }
+            for (const to_remove of check_to_remove) {
+                params_dict.delete(to_remove);
             }
 
+            for (const param of filter) {
+                // Update GET parameter
+                let param_split = param.split('=');
+                params_dict.set(param_split[0], param_split[1]);
+            }
+
+            console.log(params_dict);
             // Convert GET parameter Map to string format
             join_params = Array.from(params_dict, x => x[0] + "=" + x[1])
             redirect_location =  base + "?" + join_params.join("&");
