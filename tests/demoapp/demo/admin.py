@@ -10,6 +10,7 @@ from adminfilters.filters import (BooleanRadioFilter, DjangoLookupFilter,
                                   QueryStringFilter, RelatedFieldCheckBoxFilter,
                                   RelatedFieldRadioFilter, UnionFieldListFilter,
                                   ValueFilter, ChoicesCheckboxFilter)
+from adminfilters.json import JsonFieldFilter
 from adminfilters.mixin import AdminFiltersMixin
 from adminfilters.value import MultiValueFilter
 

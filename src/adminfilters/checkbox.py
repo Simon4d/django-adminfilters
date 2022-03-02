@@ -1,6 +1,5 @@
 from django.contrib.admin.filters import RelatedFieldListFilter
 from django.db.models.fields.related import ForeignObjectRel
-from django.db.models.fields import AutoField, IntegerField
 from django.db.models.query_utils import Q
 from django.utils.encoding import smart_str
 from django.utils.translation import gettext as _
@@ -84,15 +83,12 @@ class ChoicesCheckboxFilter(SmartFieldListFilter):
         self.lookup_kwarg = '%s__in' % field_path
         self.lookup_kwarg_isnull = '%s__isnull' % field_path
         super().__init__(field, request, params, model, model_admin, field_path)
-        self.lookup_val = request.GET.getlist(self.lookup_kwarg, [])
-        self.lookup_val_isnull = params.get(self.lookup_kwarg_isnull)
         self.lookup_choices = field.get_choices(include_blank=False)
 
     def expected_parameters(self):
         return [self.lookup_kwarg, self.lookup_kwarg_isnull]
 
     def get_updated_values(self):
-        """self.lookup_kwarg and self.lookup_kwarg_isnull are not directly updated when changed by Javascript"""
         return (self.used_parameters.get(self.lookup_kwarg, []),
                 self.used_parameters.get(self.lookup_kwarg_isnull, None))
 
