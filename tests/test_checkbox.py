@@ -1,6 +1,11 @@
+from functools import partial
+from unittest.mock import Mock
+
 import pytest
+
 from demo.models import Band
 from adminfilters.checkbox import ChoicesCheckboxFilter
+from adminfilters.utils import get_query_string
 
 
 @pytest.fixture
@@ -24,3 +29,17 @@ def test_queryset(fixtures, filter_value, expected):
     result = f.queryset(None, Band.objects.order_by('name'))
     value = list(result.order_by('name').values_list('name', flat=True))
     assert value == expected
+
+
+def test_choices(fixtures):
+    params = {'genre__in': '1,2'}
+    f = ChoicesCheckboxFilter(Band._meta.get_field('genre'), None, params, None, None, 'genre')
+    cl = Mock(get_query_string=partial(get_query_string, Mock(GET=params)), params=params)
+    choices = list(f.choices(cl))
+    assert len(choices) == 6
+    assert choices[0] == {'display': 'All', 'query_string': '?', 'selected': False, 'to_remove': 'genre__in&genre__isnull'}
+    assert choices[1] == {'display': 'None', 'query_string': '?genre__isnull=1', 'selected': False, 'to_remove': 'genre__in'}
+    assert choices[2] == {'display': 'Rock', 'query_string': '?genre__in=2', 'selected': True, 'to_remove': 'genre__isnull'}
+    assert choices[3] == {'display': 'Blues', 'query_string': '?genre__in=1', 'selected': True, 'to_remove': 'genre__isnull'}
+    assert choices[4] == {'display': 'Soul', 'query_string': '?genre__in=1%2C2%2C3', 'selected': False, 'to_remove': 'genre__isnull'}
+    assert choices[5] == {'display': 'Other', 'query_string': '?genre__in=1%2C2%2C4', 'selected': False, 'to_remove': 'genre__isnull'}

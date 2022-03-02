@@ -88,12 +88,12 @@ class ChoicesCheckboxFilter(SmartFieldListFilter):
     def expected_parameters(self):
         return [self.lookup_kwarg, self.lookup_kwarg_isnull]
 
-    def get_updated_values(self):
+    def __get_values(self):
         return (self.used_parameters.get(self.lookup_kwarg, []),
-                self.used_parameters.get(self.lookup_kwarg_isnull, None))
+                self.used_parameters.get(self.lookup_kwarg_isnull, False))
 
     def queryset(self, request, queryset):
-        lookup_val, lookup_val_isnull = self.get_updated_values()
+        lookup_val, lookup_val_isnull = self.__get_values()
         filters = Q()
 
         if lookup_val:
@@ -105,7 +105,7 @@ class ChoicesCheckboxFilter(SmartFieldListFilter):
         return queryset.filter(filters)
 
     def choices(self, cl):
-        lookup_val, lookup_val_isnull = self.get_updated_values()
+        lookup_val, lookup_val_isnull = self.__get_values()
 
         yield {
             'selected': not len(lookup_val) and not lookup_val_isnull,
