@@ -108,11 +108,20 @@ class AdminSite:
         return self.driver.get_errors()
 
 
-@pytest.fixture
-def admin_site(live_server, selenium, data):
+def goto_site(live_server, selenium, link_name):
     site = AdminSite(live_server, selenium)
     site.open('/')
-    site.wait_for(By.LINK_TEXT, 'Artists').click()
+    site.wait_for(By.LINK_TEXT, link_name).click()
     errors = site.get_errors()
     assert len(errors) == 0, '\n'.join(['{message}'.format(**err) for err in errors])
     return site
+
+
+@pytest.fixture
+def admin_site(live_server, selenium, data):
+    return goto_site(live_server, selenium, 'Artists')
+
+
+@pytest.fixture
+def admin_site_band(live_server, selenium, data):
+    return goto_site(live_server, selenium, 'Bands')
